@@ -5,9 +5,10 @@ import {
     useMatcapTexture,
 } from '@react-three/drei'
 import { Perf } from 'r3f-perf'
-import { useEffect, useState } from 'react'
+import { useRef, useEffect, useState } from 'react'
 import { temp } from 'three/tsl'
 import * as THREE from 'three'
+import { useFrame } from '@react-three/fiber'
 
 const torusGeometry = new THREE.TorusGeometry(1, 0.6, 16, 32)
 const torusMaterial = new THREE.MeshMatcapMaterial()
@@ -37,6 +38,18 @@ export default function Experience() {
         torusMaterial.needsUpdate = true
     }, [])
 
+    const donutsGroup = useRef()
+
+    useFrame((state, delta) => {
+        const time = state.clock.getElapsedTime()
+
+        for (const donut of donutsGroup.current.children) {
+            donut.rotation.y += delta * 0.1
+            donut.position.x += Math.cos(time) * 0.0001
+            donut.position.z += Math.sin(time) * 0.0001
+        }
+    })
+
     return (
         <>
             <Perf position='top-left' />
@@ -63,31 +76,33 @@ export default function Experience() {
                 </Text3D>
             </Center>
 
-            {[...Array(50)].map((value, index) => (
-                <mesh
-                    key={index}
-                    geometry={torusGeometry}
-                    material={torusMaterial}
-                    position={[
-                        //random positions from -6 to -1 and 1 to 6
-                        Math.random() < 0.5
-                            ? -1 - Math.random() * 5
-                            : 1 + Math.random() * 5,
-                        Math.random() < 0.5
-                            ? -1 - Math.random() * 5
-                            : 1 + Math.random() * 5,
-                        Math.random() < 0.5
-                            ? -1 - Math.random() * 5
-                            : 1 + Math.random() * 5,
-                    ]}
-                    scale={0.2 + Math.random() * 0.35}
-                    rotation={[
-                        Math.random() * Math.PI,
-                        Math.random() * Math.PI,
-                        0,
-                    ]}
-                />
-            ))}
+            <group ref={donutsGroup}>
+                {[...Array(50)].map((value, index) => (
+                    <mesh
+                        key={index}
+                        geometry={torusGeometry}
+                        material={torusMaterial}
+                        position={[
+                            //random positions from -6 to -1 and 1 to 6
+                            Math.random() < 0.5
+                                ? -0.75 - Math.random() * 5
+                                : 0.75 + Math.random() * 5,
+                            Math.random() < 0.5
+                                ? -0.75 - Math.random() * 5
+                                : 0.75 + Math.random() * 5,
+                            Math.random() < 0.5
+                                ? -0.75 - Math.random() * 5
+                                : 0.75 + Math.random() * 5,
+                        ]}
+                        scale={0.2 + Math.random() * 0.35}
+                        rotation={[
+                            Math.random() * Math.PI,
+                            Math.random() * Math.PI,
+                            0,
+                        ]}
+                    />
+                ))}
+            </group>
         </>
     )
 }
